@@ -1,3 +1,4 @@
+
 /*
  * FILE: uscia_UART.h
  * TARGET: MSP430x54x
@@ -12,7 +13,8 @@
 #define CR 0x0D
 #define LF 0x0A
 
-#define USART_BUFSIZE		256	 // default buffer size
+//#define USART_BUFSIZE		256	 // default buffer size
+#define USART_BUFSIZE		100	 // default buffer size
 
 #define USART0_RX_INT_DISABLE		UCA0IE &= ~UCRXIE
 #define USART0_RX_INT_ENABLE		UCA0IE |=  UCRXIE

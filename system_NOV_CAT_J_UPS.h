@@ -2,6 +2,8 @@
 //
 //	System Configuration information
 //
+// Version 1.09
+//		Added NOV_CAT_J compiler switch to allow an unused SNMP->CIP parameter Number of Input Lines to be used to report Bender Ground Fault and Impedance fault status.  0=No Fault, 1=Ground Fault, 2=Impedance Fault and 3=Both Faults
 // Version 1.08
 //		System wasn't shutting down on overload, added #define OVERLOAD_BYPASS_DISABLE
 // Version 1.07
@@ -41,13 +43,11 @@
 #define OVERLOAD_BYPASS_DISABLE		// Prevent overload from going to bypass
 //#define BYPASS_RECOVER					// Will try to recover from overload bypass
 //#define OVERLOAD_BYPASS				// Overload will force unit on bypass, not defining will shutdown
+#define NOV_CAT_J						// Use ST2 Input Lines to report Bender status
 
 //***
 #define OLD_SHUTDOWN					// remove to use new shutdown method to (hopefull) prevent slave DC out at shutdown
 //***
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0

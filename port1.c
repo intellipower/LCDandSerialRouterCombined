@@ -1,4 +1,11 @@
-#include  <msp430x54x.h>
+
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+#else
+	#include <msp430x54x.h>
+#endif
+
 //#include "types.h"
 #include "low_level_init.h"
 #include "port1.h"

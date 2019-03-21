@@ -9,6 +9,13 @@
 // Version 1.06
 //	Changed Ambient temperature trip to 70C, it didn't shut down the inverter before.
 // Now it does.
+//**************************************************************************************
+//
+//	System Configuration information
+//
+// Version 1.00
+//
+// 
 //
 //
 //
@@ -25,7 +32,7 @@
 
 //#define TRUE 1
 //#define FALSE 0
-//#define NOV_UPS==TRUE	// No active compiler switches
+//#define NOV_UPS TRUE	// No active compiler switches
 
 #define DESCRIPTION "Thales Charger Router "
 #define autoStart 1
@@ -35,9 +42,8 @@
 #define DUAL_BOARD_SERIES	FALSE		// if using dual boards in series
 #define UPS_STATE_CONTROL TRUE		// router controls the operation of 1 or 2 UPS
 //#define CHARGER_MONSTER				// Dual Model F charger
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
+//#define DUAL_CHARGER				// Dual Model F charger
+#define THALES_CHARGER				// Thales 5KVA Charger
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0

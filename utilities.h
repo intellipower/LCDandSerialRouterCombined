@@ -15,4 +15,9 @@ int fRange(volatile float test, volatile float limit1, volatile float limit2);
 #if defined TEST_COMM_RS485_TO_RS232		// calls function with Forever loop to sniff RS485 and put it on SNMP RS232
 	void testCommRs485toRs232 (void);
 #endif
+
+#if (defined COM_DEBUG)
+	void comDebug (char *str);
+#endif // defined COM_DEBUG
+
 #endif /*UTILITIES_H_*/

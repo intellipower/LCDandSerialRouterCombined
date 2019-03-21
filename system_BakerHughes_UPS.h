@@ -30,9 +30,6 @@
 #define DUAL_BOARD_SERIES	TRUE		// if using dual boards in series
 #define UPS_STATE_CONTROL TRUE			// router controls the operation of 1 or 2 UPS
 
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
-
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0
 #define UPS_VOLTINNOM 220.0

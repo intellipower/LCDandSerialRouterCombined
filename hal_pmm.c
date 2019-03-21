@@ -11,8 +11,13 @@
 //    V1.1  Adjustment to UG
 //    V1.2  Added return values
 //****************************************************************************////====================================================================
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+#else
+	#include <msp430x54x.h>
+#endif
 
-#include <msp430x54x.h>
 #include "hal_pmm.h"
 
 #define _HAL_PMM_DISABLE_SVML_

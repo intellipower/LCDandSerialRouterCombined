@@ -13,25 +13,41 @@
 
 #include "system_config.h"						// includes file name for configuration
 #include SYSTEM_CONFIG							// configuration header file
+
+#include "IAR_YES_NO.h"
 #ifdef __IAR
 	#include "io430.h"
 #else
 	#include <msp430x54x.h>
 #endif
+
 #include "uscia_UART.h"
 #include "types.h"
 #include "string.h"
+#include "math.h"
 #include "leds.h"
 #include "main.h"
 
 #define TRUE 0x01
 #define FALSE 0x00
 
+// Function Prototypes
+
+__interrupt void usart0_ISR(void);
+__interrupt void usart1_ISR(void);
+__interrupt void usart2_ISR(void);
+__interrupt void usart3_ISR(void);
+int usartBufferCheck(void);
+
+// End of Function Prototypes
+
 // #define USART_BUFFER_EMPTY 1	 // 1 = nothing to send
 
 struct uartDataStrucT usartPort[4];			// Actual structure for each UART
-extern char mspMsgTx[20];
-extern char mspMsgRx[20];
+
+//extern char mspMsgTx[20];
+//extern char mspMsgRx[20];
+
 int Rs485busy;
 
 /*
@@ -56,16 +72,12 @@ void usart_init(void) {
 
 	// UART0, UPS1
 	UCA0CTL1 |= UCSSEL__SMCLK;	// SMCLK source
-	#if BAUD_UPS1==9600
-		UCA0BR0 = 0x82;			// 16 MHz 9600 baud = 0x682 = 1666.66
-		UCA0BR1 = 0x06;			// upper byte
-	#else
-		#if BAUD_UPS1==4800
-		UCA0BR0 = 0x05;			// 16 MHz 4800 baud = 0xd05 = 3333.3333 => 16MHz/3333 = 4800
-		UCA0BR1 = 0x0d;			// upper byte
-		#endif
-	#endif
 
+	// Take counts based on Baud rate and clock rate then break down to lower and upper byte
+	
+	UCA0BR0 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_UPS1) % 256);			// lower byte remainder
+	UCA0BR1 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_UPS1) / 256);			// upper byte
+	
 	P3SEL |= BIT4 + BIT5;	// P3.4,5 = USCI_A0 RXD/TXD
 	P3DIR |= BIT4;			// P3.4 TXD
 	P3DS  |= BIT4;			// drive high
@@ -75,15 +87,10 @@ void usart_init(void) {
 	
 	// UART1, SNMP
 	UCA1CTL1 |= UCSSEL__SMCLK;	// SMCLK source
-	#if BAUD_SNMP==9600
-		UCA1BR0 = 0x82;			// 16 MHz 9600 baud
-		UCA1BR1 = 0x06;			// upper byte
-	#else
-		#if BAUD_SNMP==4800
-		UCA1BR0 = 0x05;			// 16 MHz 4800 baud = 0xd05 = 3333.3333 => 16MHz/3333 = 4800
-		UCA1BR1 = 0x0d;			// upper byte
-		#endif
-	#endif
+	
+	// Take counts based on Baud rate and clock rate then break down to lower and upper byte
+	UCA1BR0 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_SNMP) % 256);			// lower byte remainder
+	UCA1BR1 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_SNMP) / 256);			// upper byte
 	
 	P5SEL |= BIT6+BIT7;		// P5.6,7 = USCI_A1 RXD/TXD and XT2
 	P5DIR |= BIT6;
@@ -96,16 +103,10 @@ void usart_init(void) {
 	UCA2CTL1 |= UCSSEL__SMCLK;	// SMCLK source
 	UCA2CTL1 |= UCRXEIE;		// allow bad recieve to turn on interrupt flag
 
-	#if BAUD_UPSNET==9600
-		UCA2BR0 = 0x82;			// 16 MHz 9600 baud = 0x682 = 1666.66 
-		UCA2BR1 = 0x06;			// upper byte
-	#else
-		#if BAUD_UPSNET==4800
-		UCA2BR0 = 0x05;			// 16 MHz 4800 baud = 0xd05 = 3333.3333 => 16MHz/3333 = 4800
-		UCA2BR1 = 0x0d;			// upper byte
-		#endif
-	#endif
-
+	// Take counts based on Baud rate and clock rate then break down to lower and upper byte
+	UCA2BR0 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_UPSNET) % 256);			// lower byte remainder
+	UCA2BR1 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_UPSNET) / 256);			// upper byte
+	
 	P9SEL |= BIT4+BIT5;			// P9.4,5 = USCI_A2 RXD/TXD and XT2
 	P9DIR |= BIT4;
 	P9DS  |= BIT4;
@@ -121,16 +122,10 @@ void usart_init(void) {
 	// UART3, UPS2, User port and Upsilon
 	UCA3CTL1 |= UCSSEL__SMCLK;	// SMCLK source
 
-	#if BAUD_UPS2==9600
-		UCA3BR0 = 0x82;			// 16 MHz 9600 baud = 0x682 = 1666.66
-		UCA3BR1 = 0x06;			// upper byte
-	#else
-		#if BAUD_UPS2==4800
-		UCA3BR0 = 0x05;			// 16 MHz 4800 baud = 0xd05 = 3333.3333 => 16MHz/3333 = 4800
-		UCA3BR1 = 0x0d;			// upper byte
-		#endif
-	#endif
-
+	// Take counts based on Baud rate and clock rate then break down to lower and upper byte
+	UCA3BR0 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_UPS2) % 256);			// lower byte remainder
+	UCA3BR1 = (unsigned int) ((X2_CLOCK_FREQUENCY/BAUD_UPS2) / 256);			// upper byte
+	
 	P10SEL |= BIT4 + BIT5;	// P10.4,5 = USCI_A3 RXD/TXD and XT2
 	P10DIR |= BIT4;				// TXD
 	
@@ -147,8 +142,10 @@ Returns: -
 */
 char usart_putchar(volatile char cByte, int port){
 	
-	if (usartPort[port].txCharCount >= usartPort[port].bufferSize) { // full up
-		usart_tx_buffer_flush(port);		// reset buffers and counters (ie flush)
+	__disable_interrupt();
+	if (usartPort[port].txCharCount >= usartPort[port].bufferSize) // full up 
+	{
+		usart_tx_buffer_flush(port);    // reset buffers and counters (ie flush)
 		return FALSE;					// indicate char not put in buffer
 	}
 	// load byte to buffer and inc index
@@ -157,7 +154,6 @@ char usart_putchar(volatile char cByte, int port){
 	if (usartPort[port].txWriteIndex >= usartPort[port].bufferSize) {
 		usartPort[port].txWriteIndex = 0;
 	}
-	__disable_interrupt();
 	usartPort[port].txCharCount++;		// new char, inc count
 	switch(port) {
 	case 0:
@@ -227,144 +223,263 @@ Parameter: -
 Returns: -
 */
 #pragma vector=USCI_A0_VECTOR
-__interrupt void usart0_ISR(void){											// UPS1 port
-	if (UCA0IFG & UCTXIFG){
+__interrupt void usart0_ISR(void)
+{											        // UPS1 port
+	char tempChar;
+	
+	if (UCA0IFG & UCTXIFG)
+	{												// Check to see if TX Interrupt Flag set
 		// This is a TX interrupt
 		#if LCD_DISPLAY==FALSE
 			RED3_ON;
 			GRN3_OFF;
 		#endif
-		if (usartPort[0].txCharCount){										// send if chars are in buffer
-			UCA0TXBUF = usartPort[0].txBuffer[usartPort[0].txReadIndex++]; // load tx register, inc index
-			if (usartPort[0].txReadIndex >= usartPort[0].bufferSize) {	// end of circular buffer?
-				usartPort[0].txReadIndex = 0;								// reset index
+		if (usartPort[0].txCharCount)               // send if chars are in buffer
+		{
+		    // load tx register, inc index
+			UCA0TXBUF = usartPort[0].txBuffer[usartPort[0].txReadIndex++];
+			// end of circular buffer? 
+			if (usartPort[0].txReadIndex >= usartPort[0].bufferSize)
+			{
+				usartPort[0].txReadIndex = 0;       // reset index
 			}
-			usartPort[0].txCharCount--;									// char sent, dec count
-		}
-		else {
-			USART0_TX_INT_DISABLE;											// Turn off TX interrupt
+			usartPort[0].txCharCount--;             // char sent, dec count
+		} 
+		else 
+		{
+			USART0_TX_INT_DISABLE;                  // Turn off TX interrupt
 		}
 	}
-	if (UCA0IFG & UCRXIFG){
-		// This is an RX interrupt
+	if (UCA0IFG & UCRXIFG)                          // Check to see if RX Interrupt Flag set
+	{
+		                                            // This is an RX interrupt
 		#if LCD_DISPLAY==FALSE
 			GRN3_ON;
 			RED3_OFF
 		#endif
-		usartPort[0].rxBuffer[usartPort[0].rxWriteIndex++] = UCA0RXBUF;	// store received byte and inc receive index
-		if (usartPort[0].rxWriteIndex >= usartPort[0].bufferSize) {		// end of circular buffer?
-			usartPort[0].rxWriteIndex = 0;									// reset index
+		if (usartPort[1].rxCharCount >= usartPort[1].bufferSize) 
+		{
+			usartPort[1].rxCharCount = 0;
 		}
-		usartPort[0].rxCharCount++;										// received, inc count
-		//GRN0_OFF;
+		tempChar = UCA0RXBUF;                       // get character, also resets UCRXIFG
+		// 32=space, 126 ="~" is the range of printable characters, also allow newline and carriage return
+		if (((tempChar >= 32) && (tempChar <= 126)) || (tempChar == 10) || (tempChar == 13)) 
+		{
+			// store received byte and inc receive index
+			usartPort[0].rxBuffer[usartPort[0].rxWriteIndex++] = tempChar;
+			// end of circular buffer?
+			if (usartPort[0].rxWriteIndex >= usartPort[0].bufferSize)
+			{
+				usartPort[0].rxWriteIndex = 0;      // reset index
+			}
+			usartPort[0].rxCharCount++;             // received, inc count
+			// pointers equal, no characters pending 
+			if (usartPort[0].rxWriteIndex == usartPort[0].rxReadIndex)
+			{
+				usartPort[0].rxCharCount = 0;
+			}
+		} 
+		else 
+		{
+			__NOP;
+		}
 	}
 }
 
 #pragma vector=USCI_A1_VECTOR
-__interrupt void usart1_ISR(void){											// SNMP Port
-	if (UCA1IFG & UCTXIFG){
+__interrupt void usart1_ISR(void)                   // SNMP Port
+{
+	char tempChar;
+	
+	if (UCA1IFG & UCTXIFG)                          // Check to see if TX Interrupt Flag set
+	{
 		// This is a TX interrupt
 		#if LCD_DISPLAY==FALSE
 			RED2_ON;
 			GRN2_OFF;
 		#endif
-		if (usartPort[1].txCharCount){										// send if chars are in buffer
-			UCA1TXBUF = usartPort[1].txBuffer[usartPort[1].txReadIndex++]; // load tx register, inc index
-			if (usartPort[1].txReadIndex >= usartPort[1].bufferSize) {	// end of circular buffer?
-				usartPort[1].txReadIndex = 0;								// reset index
+		if (usartPort[1].txCharCount)               // send if chars are in buffer
+		{
+		    // load tx register, inc index
+			UCA1TXBUF = usartPort[1].txBuffer[usartPort[1].txReadIndex++];
+			// end of circular buffer?
+			if (usartPort[1].txReadIndex >= usartPort[1].bufferSize)
+			{
+				usartPort[1].txReadIndex = 0;       // reset index
 			}
-			usartPort[1].txCharCount--;									// char sent, dec count
+			usartPort[1].txCharCount--;             // char sent, dec count
 		}
-		else {
-			USART1_TX_INT_DISABLE;											// Turn off TX interrupt
+		else 
+		{
+			USART1_TX_INT_DISABLE;                  // Turn off TX interrupt
 		}
 	}
-	if (UCA1IFG & UCRXIFG){
+	if (UCA1IFG & UCRXIFG)                          // Check to see if RX Interrupt Flag set
+	{
 		// This is an RX interrupt
 		#if LCD_DISPLAY==FALSE
 			GRN2_ON;
 			RED2_OFF;
 		#endif
-		usartPort[1].rxBuffer[usartPort[1].rxWriteIndex++] = UCA1RXBUF;	// store received byte and inc receive index
-		if (usartPort[1].rxWriteIndex >= usartPort[1].bufferSize) {		// end of circular buffer?
-			usartPort[1].rxWriteIndex = 0;									// reset index
+		if (usartPort[1].rxCharCount >= usartPort[1].bufferSize) 
+		{
+			usartPort[1].rxCharCount = 0;
 		}
-		usartPort[1].rxCharCount++;										// received, inc count
+		tempChar = UCA1RXBUF;                       // get character, also resets UCRXIFG
+		// 32=space, 126 ="~" is the range of printable characters, also allow newline and carriage return
+		if (((tempChar >= 32) && (tempChar <= 126)) || (tempChar == 10) || (tempChar == 13)) 
+		{
+		    // store received byte and inc receive index
+			usartPort[1].rxBuffer[usartPort[1].rxWriteIndex++] = tempChar;
+			// end of circular buffer?
+			if (usartPort[1].rxWriteIndex >= usartPort[1].bufferSize)
+			{
+				usartPort[1].rxWriteIndex = 0;      // reset index
+			}
+			usartPort[1].rxCharCount++;             // received, inc count
+			// pointers equal, no characters pending
+			if (usartPort[1].rxWriteIndex == usartPort[1].rxReadIndex)
+			{
+				usartPort[1].rxCharCount = 0;
+			}
+		} 
+		else 
+		{
+			__NOP;
+		}
 	}
 }
 
 #pragma vector=USCI_A2_VECTOR
-__interrupt void usart2_ISR(void){											// UPSNET RS485 Port
+__interrupt void usart2_ISR(void)                   // UPSNET RS485 Port
+{
 	int i;
-	if (UCA2IFG & UCTXIFG){
+	char tempChar;
+	if (UCA2IFG & UCTXIFG)                          // Check to see if TX Interrupt Flag set
+	{
 		// This is a TX interrupt
 		#if LCD_DISPLAY==FALSE
 			RED1_ON;
 			GRN1_OFF;
 		#endif
-		if (usartPort[2].txCharCount){										// send if chars are in buffer
-			P9OUT |= BIT6;													// Turn on RS485 transmit enable
-			for(i=0;i<20;i++) {												// transmit enable propagation delay, so wait
-				_NOP();
+		if (usartPort[2].txCharCount)               // send if chars are in buffer
+		{
+			P9OUT |= BIT6;                          // Turn on RS485 transmit enable
+			for(i=0;i<20;i++)                       // transmit enable propagation delay, so wait
+			{
+		        __NOP;
 			}
-			Rs485busy = TRUE;												// Tell msec timer char sent, it will turn off transmit after delay
-			UCA2TXBUF = usartPort[2].txBuffer[usartPort[2].txReadIndex++]; // load tx register, inc index
-			if (usartPort[2].txReadIndex >= usartPort[2].bufferSize) {
+			// Tell msec timer char sent, it will turn off transmit after delay
+			Rs485busy = TRUE;
+			// load tx register, inc index
+			UCA2TXBUF = usartPort[2].txBuffer[usartPort[2].txReadIndex++];
+			if (usartPort[2].txReadIndex >= usartPort[2].bufferSize) 
+			{
 				usartPort[2].txReadIndex = 0;
 			}
-			usartPort[2].txCharCount--;									// char sent, dec count
+			usartPort[2].txCharCount--;	            // char sent, dec count
 		}
-		else {
-			USART2_TX_INT_DISABLE;											// Turn off TX interrupt
+		else 
+		{
+			USART2_TX_INT_DISABLE;                  // Turn off TX interrupt
 		}
 	}
-	if (UCA2IFG & UCRXIFG){
+	if (UCA2IFG & UCRXIFG)                          // Check to see if RX Interrupt Flag set
+	{
 		// This is an RX interrupt
 		#if LCD_DISPLAY==FALSE
 			GRN1_ON;
 			RED1_OFF;
 		#endif
-		if (usartPort[2].rxCharCount >= usartPort[2].bufferSize) return;
-		usartPort[2].rxBuffer[usartPort[2].rxWriteIndex++] = UCA2RXBUF;	// store received byte and inc receive index
-		if (usartPort[2].rxWriteIndex >= usartPort[2].bufferSize) {
-			usartPort[2].rxWriteIndex = 0;
+		if (usartPort[2].rxCharCount >= usartPort[2].bufferSize) 
+		{
+			usartPort[2].rxCharCount = 0;
 		}
-		usartPort[2].rxCharCount++;										// received, inc count
+		tempChar = UCA2RXBUF;                       // get character, also resets UCRXIFG
+		// 32=space, 126 ="~" is the range of printable characters, also allow newline and carriage return
+		if (((tempChar >= 32) && (tempChar <= 126)) || (tempChar == 10) || (tempChar == 13)) 
+		{
+		    // store received byte and inc receive index
+			usartPort[2].rxBuffer[usartPort[2].rxWriteIndex++] = tempChar;
+			if (usartPort[2].rxWriteIndex >= usartPort[2].bufferSize) 
+			{
+				usartPort[2].rxWriteIndex = 0;
+			}
+			usartPort[2].rxCharCount++;             // received, inc count
+			// pointers equal, no characters pending
+			if (usartPort[2].rxWriteIndex == usartPort[2].rxReadIndex)
+			{
+				usartPort[2].rxCharCount = 0;
+			}
+		} 
+		else 
+		{
+		    __NOP;
+		}
 	}
 }
 
 #pragma vector=USCI_A3_VECTOR
-__interrupt void usart3_ISR(void){									// UPS2, User Port and Upsilon
-	if (UCA3IFG & UCTXIFG){
+__interrupt void usart3_ISR(void)                   // UPS2, User Port and Upsilon
+{
+	char tempChar;
+
+	if (UCA3IFG & UCTXIFG)                          // Check to see if TX Interrupt Flag set
+	{
 		// This is a TX interrupt
 		#if LCD_DISPLAY==FALSE
 			RED0_ON;
 			GRN0_OFF;
 		#endif
-		if (usartPort[3].txCharCount){								// send if chars are in buffer
+		if (usartPort[3].txCharCount)               // send if chars are in buffer
+		{
 			// load tx register, inc index
 			UCA3TXBUF = usartPort[3].txBuffer[usartPort[3].txReadIndex++];
 			// end of circular buffer?
-			if (usartPort[3].txReadIndex >= usartPort[3].bufferSize) {
-				usartPort[3].txReadIndex = 0;						// reset index
+			if (usartPort[3].txReadIndex >= usartPort[3].bufferSize) 
+			{
+				usartPort[3].txReadIndex = 0;       // reset index
 			}
-			usartPort[3].txCharCount--;							// char sent, dec count
+			usartPort[3].txCharCount--;             // char sent, dec count
 		}
-		else {
-			USART3_TX_INT_DISABLE;									// Turn off TX interrupt
+		else 
+		{
+			USART3_TX_INT_DISABLE;                  // Turn off TX interrupt
 		}
 	}
-	if (UCA3IFG & UCRXIFG){
+	if (UCA3IFG & UCRXIFG)                          // Check to see if RX Interrupt Flag set
+	{
 		// This is an RX interrupt
 		#if LCD_DISPLAY==FALSE
 			GRN0_ON;
 			RED0_OFF;
 		#endif
-		usartPort[3].rxBuffer[usartPort[3].rxWriteIndex++] = UCA3RXBUF;	// store received byte and inc receive index
-		if (usartPort[3].rxWriteIndex >= usartPort[3].bufferSize) { // end of circular buffer?
-			usartPort[3].rxWriteIndex = 0;			// reset index
+		if (usartPort[3].rxCharCount >= usartPort[3].bufferSize) 
+		{
+			usartPort[3].rxCharCount = 0;
 		}
-		usartPort[3].rxCharCount++;								// received, inc count
+		tempChar = UCA3RXBUF;                       // get character, also resets UCRXIFG
+		// 32=space, 126 ="~" is the range of printable characters, also allow newline and carriage return
+		if (((tempChar >= 32) && (tempChar <= 126)) || (tempChar == 10) || (tempChar == 13)) 
+		{
+		    // store received byte and inc receive index
+			usartPort[3].rxBuffer[usartPort[3].rxWriteIndex++] = tempChar;
+			// end of circular buffer?
+			if (usartPort[3].rxWriteIndex >= usartPort[3].bufferSize)
+			{
+				usartPort[3].rxWriteIndex = 0;      // reset index
+			}
+			usartPort[3].rxCharCount++;             // received, inc count
+			// pointers equal, no characters pending
+			if (usartPort[3].rxWriteIndex == usartPort[3].rxReadIndex)
+			{
+				usartPort[3].rxCharCount = 0;
+			}
+		} 
+		else 
+		{
+		    __NOP;
+		}
 	}
 }
 
@@ -404,11 +519,8 @@ char usart_getchar(int port){
 	char cByte;
 	
 	if (usartPort[port].rxCharCount){						// char still available
-		cByte = usartPort[port].rxBuffer[usartPort[port].rxReadIndex++];	// get byte from buffer
-		if (usartPort[port].rxReadIndex >= usartPort[port].bufferSize) {
-			usartPort[port].rxReadIndex = 0;
-		}
-		switch(port) {
+		switch(port) 
+		{
 		case 0:
 			USART0_RX_INT_DISABLE;							// disable rx interrupt (IE2)
 			break;
@@ -422,10 +534,14 @@ char usart_getchar(int port){
 			USART3_RX_INT_DISABLE;							// disable rx interrupt (IE2)
 			break;
 		}
-		//USART0_RX_INT_DISABLE;							// disable rx interrupt (IE2)
+		cByte = usartPort[port].rxBuffer[usartPort[port].rxReadIndex++];	// get byte from buffer
+		if (usartPort[port].rxReadIndex >= usartPort[port].bufferSize) 
+		{
+			usartPort[port].rxReadIndex = 0;
+		}
 		usartPort[port].rxCharCount--;						// one char read, dec count
-		//USART0_RX_INT_ENABLE;							// done, enable int (IE2)
-		switch(port) {
+		switch(port) 
+		{
 		case 0:
 			USART0_RX_INT_ENABLE;							// done, enable int (IE2)
 			break;

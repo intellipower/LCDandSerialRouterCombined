@@ -24,14 +24,11 @@
 
 #define DESCRIPTION "NSWC3 Router "
 #define autoStart 1		// 0 = No auto start, 1 = Yes
-#define UPS_MODEL "3000"
+#define UPS_MODEL "2500"
 #define LCD_DISPLAY FALSE
 #define DUAL_BOARD FALSE				// if using 2 Model F with separate battery strings
 #define DUAL_BOARD_SERIES	FALSE		// if using dual boards in series
 #define UPS_STATE_CONTROL FALSE		// router controls the operation of 1 or 2 UPS
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0
@@ -42,8 +39,18 @@
 #define UPS_VAOUTNOM 3000.0
 #define UPS_VOLTOUTNOM 115.0
 // 5KVA 230V = 8 Batteries, Engility 120V = 6 Batteries
-#define NUM_BAT 9.0
-#define NUM_CELLS NUM_BAT * 6.0
+#define NUM_BAT								(9.0)
+#define NUM_CELLS							(NUM_BAT * 6.0)
+#define LOW_BATTERY_ALARM 					(1.75 * NUM_CELLS)
+#define LOW_BATTERY_ALARM_LOW_POWER 		(1.83 * NUM_CELLS)
+#define LOW_BATTERY_SD						(1.67 * NUM_CELLS)
+#define LOW_BATTERY_SD_LOW_POWER			(1.75 * NUM_CELLS)
+#define BATTERY_OHMS_PER_CELL				(0.011)
+#define BATTERY_RESISTANCE					(BATTERY_OHMS_PER_CELL * NUM_CELLS)
+#define BATTERY_V_MIN_0_PCT					(1.67 * NUM_CELLS)
+#define BATTERY_V_MAX_0_PCT					(2.52 * NUM_CELLS)
+#define BATTERY_V_MIN_100_PCT				(2.02 * NUM_CELLS)
+#define BATTERY_V_MAX_100_PCT				(2.15 * NUM_CELLS)
 
 #define TEMP_AMB_ALM_ON 	65.0
 #define TEMP_AMB_ALM_OFF 	60.0
@@ -69,7 +76,9 @@
 //#define COM_SNMP
 //#define COM_UPSILON
 #define COM_ETI
-//#define ETI_VERBOSE					// Verbose response on commands for user extensions
+#define BATTERY_TRAY_INDICATION
+#define MOCK_ETI_OUTPUT		(TRUE)
+//#define ETI_SCALE_BY_1
 
 // Communication Setup 4800, 9600
 #define BAUD_UPS1		4800

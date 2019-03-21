@@ -23,7 +23,7 @@
 
 //#define TRUE 1
 //#define FALSE 0
-#define NOV_UPS==FALSE
+//#define NOV_UPS FALSE
 
 #define DESCRIPTION "Briefcase Lithium "
 #define autoStart 0
@@ -35,9 +35,6 @@
 #define LCD_BYPASS_OPTION_DISABLED		// Do not display Bypass option on LCD, but show freq 50/60 option
 #define LCD_AUTOSTART_OPTION			// use this with LCD_BYPASS_OPTION_DISABLED to only have autostart option shown
 #define LCD_MANAGER_BOSS
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0

@@ -11,9 +11,15 @@
 //    V1.1  Added timeout function
 //    V1.1  Added parameter for XTDrive
 //*******************************************************************************
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+#else
+	#include <msp430x54x.h>
+#endif
 
-#include <msp430x54x.h>
 #include "hal_UCS.h"
+#include "types.h"
 
 //====================================================================
 /**
@@ -170,6 +176,7 @@ void Init_FLL(unsigned int fsystem, const unsigned int ratio)
 {
   volatile unsigned int d, dco_div_bits;
   volatile unsigned int mode = 0;
+  unsigned int tempbits, tempd;
   //  /\  Prevent variables from being "optimized".
 
   // save actual state of FLL loop control
@@ -193,8 +200,12 @@ void Init_FLL(unsigned int fsystem, const unsigned int ratio)
 
   UCSCTL0 = 0x000;               // Set DCO to lowest Tap
 
-  UCSCTL2 &= ~(0x3FF);           // Reset FN bits
-  UCSCTL2 = dco_div_bits | (d - 1);
+  UCSCTL2 &= (unsigned int) ~(0x3FF);           // Reset FN bits
+
+//  UCSCTL2 = dco_div_bits | (d - 1);   //volatile bits issue with IAR
+  tempbits = dco_div_bits;
+  tempd = d - 1;
+  UCSCTL2 = tempbits | tempd;    // new equation
 
   if (fsystem <= 630)            //           fsystem < 0.63MHz
 	UCSCTL1= DCORSEL_0 ;
@@ -221,7 +232,8 @@ void Init_FLL(unsigned int fsystem, const unsigned int ratio)
     SELECT_MCLK_SMCLK(SELM__DCOCLK + SELS__DCOCLK);       // select DCOCLK
   else
     SELECT_MCLK_SMCLK(SELM__DCOCLKDIV + SELS__DCOCLKDIV); // selcet DCODIVCLK
-  _NOP();													 // No Op required before set of GIE
+
+  __NOP;
   __bis_SR_register(globalInterruptState);                // restore previous state
 
 } // End of fll_init()

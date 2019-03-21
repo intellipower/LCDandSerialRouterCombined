@@ -2,8 +2,13 @@
 
 // Check configuration in system_config.h may be 5KVA dual board or Briefcase UPS
 
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+#else
+	#include <msp430x54x.h>
+#endif
 
-#include <msp430x54x.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,6 +66,9 @@ volatile struct upsDataStrucT upsOne, upsTwo, upsThree, upsBoss, *pUpsOne, *pUps
 volatile struct upsDataStrucT /* *pUpsMain, *pUpsDisplay, */ *pUpsLcd;
 //volatile struct upsDataStrucT upsOne, upsTwo, upsBoss, *pUpsOne, *pUpsTwo, *pUpsBoss, *pUps;
 #ifdef SNMP_MIMIC
+	volatile struct snmpDataStruct charger;				// extern from main.c
+#endif
+#if (defined THALES_CHARGER)
 	volatile struct snmpDataStruct charger;				// extern from main.c
 #endif
 
@@ -140,6 +148,10 @@ int fakeButtonState = 0;	// set with bit representing buttons
 #define LCD_BAR_END 10
 #define LCD_BAR_NUM (LCD_BAR_END - LCD_BAR_START)
 #define LCD_BAR_MAX_VERT 5	// Number of vertical lines in LCD character (5x8)
+
+// Function prototypes
+
+void lcd_debug(uint8_t rowbyte, uint8_t charbyte);
 
 uint8_t lcd_debug_pos[4] = {0,0,0,0};
 void lcd_debug(uint8_t row, uint8_t character){
@@ -427,9 +439,11 @@ void lcdOptionScreen(volatile struct upsDataStrucT *upsData) {
 void lcdOperatingScreen(volatile struct upsDataStrucT *upsData) {
 
 	static volatile int infoLine = 0, infoLineOn = FALSE, infoLinePause = 0;// parametric information on 4th line of display
-	volatile char tempStr[100], stemp[10];
+	volatile char tempStr[25], stemp[10];
 	volatile long ltemp1, ltemp2;
-
+	long val1, val2;                 // temporary long values  - used to fix IAR volatile reference issues             
+	float tmpfloat1, tmpfloat2;      // temporary float values -   ditto above
+        
 	if (upsData->tAmbMode == ON_ALARM) { 		// Temperature alarm
 		LED0_OFF;								// Indicates UPS On
 		LED1_OFF;								// Battery Warn, yellow on bat, red Low bat
@@ -540,13 +554,24 @@ void lcdOperatingScreen(volatile struct upsDataStrucT *upsData) {
 				// take remaining battery run time in seconds and convert to min:sec
 				ltemp1 = upsData->estSecBat;
 				ltemp2 = ltemp1/60;
-				ltoa(ltemp2, (char *) upsData->estTimeStr);
+
+//				ltoa(ltemp2, (char *) upsData->estTimeStr);
+				sprintf( (char *) upsData->estTimeStr,"%ld", ltemp2);
+                                
 				strcat((char *) upsData->estTimeStr,":");
-				ltemp1 -= ltemp2*60;
+
+//				ltemp1 -= ltemp2*60;            // no amount of parenthisis seemed to help with the ordering
+				val1 = ltemp1;                  // val1 and val2 aren't used anywhere else
+				val2 = ltemp2;                  //   so they don't need to be "volatile"...
+				ltemp1 = (val1 - (val2*60));    
+                                
 				if (ltemp1 < 10) {								// want two digits for seconds if 1 number pad with leading zero
 					strcat((char *) upsData->estTimeStr,"0");
 				}
-				ltoa(ltemp1, (char *) stemp);
+
+//				ltoa(ltemp1, (char *) stemp);
+				sprintf( (char *) stemp, "%ld", ltemp1);
+                                
 				strcat((char *) upsData->estTimeStr,(char *) stemp);
 				sprintf((char *)tempStr, "Time %s       ",(char *)upsData->estTimeStr);
 				LCD_putbuf((ubyte *) tempStr, 15, 3, 0);		// str  #char, #row, start column
@@ -560,8 +585,14 @@ void lcdOperatingScreen(volatile struct upsDataStrucT *upsData) {
 						LED1_YLW;
 						LED3_OFF;
 					}
-					if ( ((upsData->voltBat <= upsData->vBatWarn) || (upsData->estSecBat < 180) )
-							&& (upsBoss.batWarnFlag == FALSE) ) {
+
+//					if ( ((upsData->voltBat <= upsData->vBatWarn) || (upsData->estSecBat < 180) )
+//							&& (upsBoss.batWarnFlag == FALSE) ) {                                 
+					tmpfloat1 = upsData->voltBat ;
+					tmpfloat2 = upsData->vBatWarn;
+					val1 = upsData->estSecBat;
+					if ( ( (tmpfloat1 <= tmpfloat2) || (val1 < 180)) && (upsBoss.batWarnFlag == FALSE))
+					{
 						upsBoss.batWarnFlag = TRUE;			// used to see if alarm is active
 						LCD_putbuf((uint8_t *)"  Low Battery   ", 16, 0, 0);
 					}
@@ -737,13 +768,19 @@ void lcdOperatingScreen(volatile struct upsDataStrucT *upsData) {
 				// take remaining battery run time in seconds and convert to min:sec
 				ltemp1 = upsBoss.estSecBat;
 				ltemp2 = ltemp1/60;
-				ltoa(ltemp2, (char *) upsBoss.estTimeStr);
+
+//				ltoa(ltemp2, (char *) upsBoss.estTimeStr);
+				sprintf( (char *) upsBoss.estTimeStr,"%ld", ltemp2);
+
 				strcat((char *) upsBoss.estTimeStr,":");
 				ltemp1 -= ltemp2*60;
 				if (ltemp1 < 10) {								// want two digits for seconds if 1 number pad with leading zero
 					strcat((char *) upsBoss.estTimeStr,"0");
 				}
-				ltoa(ltemp1, (char *) stemp);
+
+//				ltoa(ltemp1, (char *) stemp);
+				sprintf( (char *) stemp,"%ld", ltemp1);
+
 				strcat((char *) upsBoss.estTimeStr,(char *) stemp);
 				sprintf((char *)tempStr, "Time %s       ",(char *)upsBoss.estTimeStr);
 				LCD_putbuf((ubyte *) tempStr, 15, 3, 0);		// str  #char, #row, start column
@@ -866,24 +903,25 @@ void lcdOperatingScreen(volatile struct upsDataStrucT *upsData) {
 					strcpy((char *)tempStr, "Batteries OV      ");
 					break;
 				default:
-					strcpy((char *)tempStr, "Batteries?       ");
+					if (timer(upsBoss.timeStarted, 45000)) {			// wait until we get good information from charger
+						strcpy((char *)tempStr, "Batteries?       ");
+					} else {
+						strcpy((char *)tempStr, "                 "); // keep bottom line clear during timeout
+					}
 					break;
 				}
-				/*
-				if (upsData->batCond == 1) {
-					strcpy((char *)tempStr, "Battery Warning   ");
-				}
-				else {
-					strcpy((char *)tempStr, "Bad Batteries   ");
-				}
-				*/
-				LCD_putbuf((ubyte *) tempStr, 15, 3, 0);// str  #char, #row, start column				
+				// string, number of characters, row number, starting column number				
+				LCD_putbuf((ubyte *) tempStr, 15, 3, 0);
 			} else {
 				if (infoLinePause++ >= 5) {					// this called once per second by lcdManager()
 					infoLinePause = 0;
 					switch (infoLine) {
 					case 0:
-						sprintf((char *)tempStr, "%3.0fW, %1.2fPF   "	,upsData->powOut,upsData->pfOut);
+					    //sprintf((char *)tempStr, "%3.0fW, %1.2fPF   "	,upsData->powOut,upsData->pfOut);                                          
+						tmpfloat1 = upsData->powOut;                    
+						tmpfloat2 = upsData->pfOut;
+						sprintf((char *)tempStr, "%3.0fW, %1.2fPF   "	,tmpfloat1,tmpfloat2);
+
 						LCD_putbuf((ubyte *) tempStr, 15, 3, 0);// str  #char, #row, start column
 						infoLine++;
 						break;
@@ -927,20 +965,21 @@ void lcdOperatingScreen(volatile struct upsDataStrucT *upsData) {
 
 void lcdManager(volatile struct upsDataStrucT *upsData) {
 
-	char tempStr[100];
-
 	pUpsLcd = upsData;		// set pointer to ups data structure address passed to this routine
 
 	lcdButtonsPressed = buttons_query();			// get number with bits representing pressed buttons
 	if (lcdButtonsPressed == BUTTON1) {	// debug
-		_NOP();
+		__NOP;
 	}
 	if (lcdButtonsPressed != lcdButtonsPressedLast) {
 		lcdButtonsPressedLast = lcdButtonsPressed;
+		/*
+		// reduced tempStr to 25 characters
 		sprintf(tempStr, "%s = %d","lcdManager: button change",lcdButtonsPressed);
 		addEvent(tempStr,9);
+		*/
 	}
-/*
+	/*
 	if ( (lcdButtonsPressed & BUTTON4) && (otherMenu == FALSE) ) {	// More button pressed
 		otherMenu = TRUE;
 		otherMenuState = LCD_OPT_START;
@@ -953,7 +992,7 @@ void lcdManager(volatile struct upsDataStrucT *upsData) {
 		fakeButtonState = lcdButtonsPressed;		// Normal operation, pass buttons to all other functions
 		lcdOperatingScreen(pUpsLcd);
 	}
-*/
+	*/
 
 	if (lcdButtonsPressed == 
 		(BUTTON2+BUTTON3+BUTTON4) ) {				// Communication Bypass = all buttons pressed
@@ -971,7 +1010,9 @@ void lcdManager(volatile struct upsDataStrucT *upsData) {
 		} else {
 			fakeButtonState = lcdButtonsPressed;	// Normal operation, pass buttons to all other functions
 			if (lcdButtonsPressed == BUTTON1) {	// debug
-				_NOP();
+			    //_NOP();
+			    //__asm("nop");
+			    __NOP;
 			}
 			lcdOperatingScreen(pUpsLcd);
 		}
@@ -1090,7 +1131,7 @@ void update_LCD_bar(float level, int row) {
 		LCD_putbuf((ubyte *) "Load ", 5, row, 0);// str  #char, #row, start column
 		break;
 	}
-	tempData = (int) level + 0.5;	// convert to int for faster processing
+	tempData = (int) (level + 0.5);	// convert to int for faster processing
 	sprintf(tempStr, "%3d", tempData);
 	tempStrLen = strlen(tempStr);
 	strcat(tempStr, "%");						// add percent char
@@ -1137,7 +1178,7 @@ void update_LCD_bat_levels(float level) {
 	int tempStrLen, tempData;
 	char tempStr[10];
 
-	tempData = (int) level + 0.5;	// convert to int for faster processing
+	tempData = (int) (level + 0.5);	// convert to int for faster processing
 	sprintf(tempStr, "%3d", tempData);
 	tempStrLen = strlen(tempStr);
 	strcat(tempStr, "%");						// add percent char
@@ -1170,7 +1211,7 @@ void update_LCD_load_levels(float level) {
 	int tempStrLen, tempData;
 	char tempStr[10];
 
-	tempData = (int) level + 0.5;	// convert to int for faster processing
+	tempData = (int) (level + 0.5);	// convert to int for faster processing
 	sprintf(tempStr, "%3d", tempData);
 	tempStrLen = strlen(tempStr);
 	strcat(tempStr, "%");						// add percent char

@@ -4,8 +4,14 @@
  * AUTHOR: Dan Rhodes
  * DESCRIPTION:	 chip level initialization not done by compiler
 */
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+	#include "IAR_low_level_init.c"		// We need __low_level_init() function
+#else						//   -- this runs before main() to turn of WDT
+	#include <msp430x54x.h>
+#endif
 
-#include  <msp430x54x.h>
 //#include "types.h"
 #include "low_level_init.h"
 #include "leds.h"
@@ -17,8 +23,9 @@ void low_level_init (void) {
 
 	volatile long clockTimeout = 0;
 	volatile int portMask;
+	int tempMask;
 	
-	WDTCTL = WDTPW + WDTHOLD;		// Stop WDT
+	WDTCTL = WDTPW + WDTHOLD;		// Stop WDT == now done in __low_level_init()
 
 	//	Program internal Low Voltage Drop Out core regulator to full voltage
 	/*
@@ -34,36 +41,51 @@ void low_level_init (void) {
 	//	Step 4 - Program the SVS_L to the new level
 		SVSMLCTL = SVSLRVL_3;
 	 */
-	SetVCore(PMMCOREV_2);			// TODO - Core Voltage Regulator, 1.8V or 1.9V for full speed
+	SetVCore(PMMCOREV_3);			// TODO - Core Voltage Regulator, 1.8V or 1.9V for full speed
 
 	// Set unused pins to output
-	portMask = BIT0+BIT1;
-	P1OUT &= ~(portMask);
-	P1DIR = portMask;
+        
+        portMask = BIT0+BIT1;
+//	P1OUT &= ~(portMask);
+        tempMask = portMask;       
+        P1OUT &= ~tempMask;
+	P1DIR = tempMask;
 	
 	portMask = BIT3+BIT6+BIT7;
-	P3OUT &= ~(portMask);
-	P3DIR = portMask;
+//	P3OUT &= ~(portMask);
+        tempMask = portMask;       
+        P3OUT &= ~tempMask;
+	P3DIR = tempMask;
 	
 	portMask = BIT1+BIT2+BIT3+BIT4+BIT5+BIT6+BIT7;
-	P6OUT &= ~(portMask);
-	P6DIR = portMask;
+//      P6OUT &= ~(portMask);
+        tempMask = portMask;       
+        P6OUT &= ~tempMask;
+	P6DIR = tempMask;
 	
 	portMask = BIT3+BIT4+BIT5+BIT6+BIT7;
-	P7OUT &= ~(portMask);
-	P7DIR = portMask;
+//	P7OUT &= ~(portMask);
+        tempMask = portMask;       
+        P7OUT &= ~tempMask;
+	P7DIR = tempMask;
 
 	portMask = BIT2+BIT3+BIT4+BIT5+BIT6+BIT7;
-	P8OUT &= ~(portMask);
-	P8DIR = portMask;
+//	P8OUT &= ~(portMask);
+        tempMask = portMask;       
+        P8OUT &= ~tempMask;
+	P8DIR = tempMask;
 	
 	portMask = BIT0+BIT1+BIT2+BIT3;
-	P9OUT &= ~(portMask);
-	P9DIR = portMask;
+//	P9OUT &= ~(portMask);
+        tempMask = portMask;       
+        P9OUT &= ~tempMask;
+	P9DIR = tempMask;
 	
 	portMask = BIT6+BIT7;
-	P10OUT &= ~(portMask);
-	P10DIR = portMask;
+//	P10OUT &= ~(portMask);
+        tempMask = portMask;       
+        P10OUT &= ~tempMask;
+	P10DIR = tempMask;
 	
 	P2DIR = 0xFF;					// LEDs
 	P2OUT = 0xFF;

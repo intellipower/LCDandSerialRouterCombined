@@ -21,7 +21,7 @@
 
 //#define TRUE 1
 //#define FALSE 0
-#define NOV_UPS==TRUE
+//#define NOV_UPS TRUE
 
 #define DESCRIPTION "NOV Router "
 #define autoStart 0
@@ -30,9 +30,6 @@
 #define DUAL_BOARD FALSE				// if using 2 Model F with separate battery strings
 #define DUAL_BOARD_SERIES	FALSE		// if using dual boards in series
 #define UPS_STATE_CONTROL FALSE		// router controls the operation of 1 or 2 UPS
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0

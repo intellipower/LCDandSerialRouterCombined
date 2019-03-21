@@ -3,6 +3,7 @@
 
 #include "timera.h"
 #include "uscia_UART.h"
+#include "IAR_YES_NO.h"
 
 #define uint8_t unsigned char
 #define uint16_t unsigned int
@@ -28,6 +29,11 @@
 
 // readability
 #define Forever for(;;)			// Neat
+#if (defined __IAR)
+    #define __NOP __asm("nop")
+#else
+    #define __NOP _NOP()
+#endif
 
 typedef enum comStates_t {
     COM_IDLE,
@@ -124,111 +130,15 @@ typedef enum {
 // snmpParse definitions
 
 typedef enum snmpStates_t {
+	SNMP_COMMAND,
     SNMP_IDLE,
     SNMP_WAITING,
+    SNMP_CHECK,
     SNMP_RESPONSE,
     SNMP_BYPASS,
     SNMP2_RESPONSE_DELAY
 } snmpStates_t;
 
-//volatile snmpStates_t snmpComState, lastSnmpComState;
-
-/*
-#define SNMP_CMD_MAX 24
-
-typedef enum {
-    AP1,		// Poll commands, some Set commands
-    AP2,
-    ATR,		// Poll and Set
-    BTS,
-    MAN,
-    MOD,
-    NOM,
-    OTC,
-    OTD,
-    PSD,		// Timed shutdown
-    ST1,
-    ST2,
-    ST3,
-    ST4,
-    ST5,
-    ST6,
-    ST7,
-    SDA,		// Poll and Set
-    STD,		// Timed startup
-    STR,
-    UBR,
-    UID,
-    VER,
-    XD1,
-    NO_SNMP_CMD
-} snmpParsePollEnumT;
-
-snmpParsePollEnumT snmpParsePoll;
-
-typedef enum {
-    SNMP,
-    UPSILON
-} snmpParserT;
-
-volatile char snmpParsePollCmd[SNMP_CMD_MAX][5] = {
-            "AP1",
-            "AP2",
-            "ATR",
-            "BTS",
-            "MAN",
-            "MOD",
-            "NOM",
-            "OTC",
-            "OTD",
-            "PSD",		// Timed shutdown
-            "ST1",
-            "ST2",
-            "ST3",
-            "ST4",
-            "ST5",
-            "ST6",
-            "ST7",
-            "SDA",
-            "STD",		// Timed startup
-            "STR",
-            "UBR",
-            "UID",
-            "VER",
-            "XD1",
-        };
-
-typedef enum {
-    START, LEN, DATA
-} snmpPartT;
-
-typedef enum {
-    POLL,
-    SET,
-    FAIL,
-    UNKNOWN
-} snmpTypeT;
-
-
-#define SNMP_STR_MAX 200
-#define SNMP_STR2_MAX 50
-
-struct snmpDataStruct {
-	volatile int snmpPort;
-	volatile snmpParserT parser;
-	volatile snmpStates_t snmpComState, lastSnmpComState;
-	volatile char str[SNMP_STR_MAX], aLen[SNMP_STR2_MAX], aData[SNMP_STR_MAX],responseStr[SNMP_STR_MAX], snmpChar;
-	volatile int pos, subPos, dataLen, comOkay;
-	volatile snmpTypeT type;
-	volatile snmpPartT phase;
-	volatile snmpParsePollEnumT snmpCmd;
-	volatile struct timeT timeOutStart;			// timeOut for waiting for response
-	volatile char StrParams[PARAM_NUM_MAX][PARAM_LEN_MAX];		//	when parsed each parameter will be in a string form up to 20 params
-	volatile int lastParam;										//	last parameter location, -1 if none, 0 if 1
-} snmpDataStruct;
-*/
-
-//volatile struct snmpDataStruct snmp, upsilon, *pSnmp, *pUpsilon;
 
 
 #endif

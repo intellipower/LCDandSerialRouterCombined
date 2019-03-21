@@ -30,9 +30,6 @@
 #define DUAL_BOARD_SERIES	FALSE		// if using dual boards in series
 #define UPS_STATE_CONTROL TRUE		// router controls the operation of 1 or 2 UPS
 
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
-
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0
 #define UPS_VOLTINNOM 115.0
@@ -69,7 +66,9 @@
 //#define COM_SNMP
 //#define COM_UPSILON
 #define COM_ETI
-//#define ETI_VERBOSE					// Verbose response on commands for user extensions
+//#define BATTERY_TRAY_INDICATION
+#define MOCK_ETI_OUTPUT		(TRUE)
+#define ETI_SCALE_BY_1
 
 // Communication Setup 4800, 9600
 #define BAUD_UPS1		4800

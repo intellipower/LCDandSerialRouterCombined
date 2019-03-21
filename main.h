@@ -11,8 +11,8 @@ typedef enum _upsParsePollEnum_t {
     RDAT04_NOTIFY_ON,		// Turn on Notify
     RDAT05_NOTIFY_OFF,		// Turn off Notify
     RDAT06_MISC_PARMS,		// Left over parameters
-    RDAT07_OPTO_INPUTS,	// Optoisolator states 4 fields, EPO, BatShort, On/Off, TBD - 0=off, 1=on, 2=not used
-    RDAT10_COMBO_PARMS,	// All of the others requested together
+    RDAT07_OPTO_INPUTS,	    // Optoisolator states 4 fields, EPO, BatShort, On/Off, TBD - 0=off, 1=on, 2=not used
+    RDAT10_COMBO_PARMS,	    // All of the others requested together
     RDAT20_SLAVE_ON,		// Slave mode
     RDAT21_SLAVE_OFF,		// Slave mode
     RDAT22_CHKSUM_ON,		// Checksum mode
@@ -39,7 +39,7 @@ typedef enum _upsParsePollEnum_t {
     CMD_END					// special marker indicating no active command
 } upsParsePollEnum_t;
 
-#define SNMP_STR_MAX 200
+#define SNMP_STR_MAX 100
 #define SNMP_STR2_MAX 50
 
 typedef enum {
@@ -50,7 +50,7 @@ typedef enum {
 
 #define SNMP_CMD_MAX 25
 
-typedef enum _snmpParsePollEnumT {
+typedef enum /* _snmpParsePollEnumT */ {
     AP1,		// Poll commands, some Set commands
     AP2,
     ATR,		// Poll and Set
@@ -98,7 +98,7 @@ struct snmpDataStruct {
 	volatile int snmpPort;
 	volatile snmpParserT parser;
 	volatile snmpStates_t snmpComState, lastSnmpComState;
-	volatile char str[SNMP_STR_MAX], aLen[SNMP_STR2_MAX], aData[SNMP_STR_MAX],responseStr[SNMP_STR_MAX], snmpChar;
+	volatile char aLen[SNMP_STR2_MAX], aData[SNMP_STR_MAX],/* responseStr[SNMP_STR_MAX], */ snmpChar;
 	volatile int pos, subPos, dataLen, comOkay;
 	// comOkay is normally used when SNMP command is received, if the command is not understood
 	// it returns "^0".  When used with the SNMP mimic for getting information it will count the
@@ -148,7 +148,7 @@ struct upsDataStrucT {
 	volatile int nextChrPos;									// position in string next character will take, empty = 0
 	volatile char StrTemp [TEMP_BUFFER_LENGTH];				// use this to edit a string, ex. pulling comma delimited response apart
 	volatile int nextTempChrPos;								// position in string next character will take, empty = 0
-	volatile char StrParams[PARAM_NUM_MAX][PARAM_LEN_MAX];	//	when parsed each parameter will be in a string form up to 20 params
+	//volatile char StrParams[PARAM_NUM_MAX][PARAM_LEN_MAX];	//	when parsed each parameter will be in a string form up to 20 params
 	volatile int lastParam;									//	last parameter location, -1 if none, 0 if 1
 	volatile char masterCmdStr[MAX_MASTER_CMDS][CMD_STR_MAX];//	This holds the commands sent to the UPS's in a circular buffer
 	volatile upsParsePollEnum_t masterCmd[MAX_MASTER_CMDS];	// when masterCmdStr[x] gets sent, masterCmd[x] is used to process response
@@ -160,8 +160,8 @@ struct upsDataStrucT {
 	volatile int notifyMsg;									// in process of receiving notification from ups, button press, status change, etc.
 	volatile int snmpUid;										// SNMP ID number 0-999 so more than one UPS on network can be identified
 	volatile char almMask[DISPLAY_LEN];						// alarm string sent to UPS, 9 char and null
-	volatile int comOkay, comErrors;
-	volatile struct timeT timeCmdMade, timeOutStart;			// timeCmdMade used for next time, timeOut for waiting for response
+	volatile int comOkay, comMsgOkay, comErrors;
+	volatile struct timeT timeCmdMade, timeOutStart, timeStarted;			// timeCmdMade used for next time, timeOut for waiting for response
 	volatile float ampBat, ampChg, voltBat, batChgPct, hiVoltTrans, freqIn, voltIn, lowVoltTrans;
 	volatile float freqInNom, voltInNom, timeLoBatNom, freqOutNom, powOutNom, vaOutNom, voltOutNom;
 	volatile long batJouleNom, batJoule;
@@ -178,7 +178,8 @@ struct upsDataStrucT {
 	volatile long durSecReboot, secOnBat, estSecBat, secStartupDelay, secShutdownDelay;// secShutdownDelay 1-999 sec, 0=off
 	volatile char estTimeStr[10];										// formatted bat time remaining min:sec
 	// chgModeSnmp takes snmp value from ups RDAT06 and passes it to SNMP, RDAT03 send mode ex. AUTO_FAST
-	volatile int batSts, batStsLast, chgModeSnmp, linesNumIn, batWarnFlag;
+	//volatile int batSts, batStsLast, chgModeSnmp, linesNumIn, batWarnFlag;
+	int batSts, batStsLast, chgModeSnmp, linesNumIn, batWarnFlag;
 	volatile int battleShort;											// 1=battleshort, 0=off
 	volatile int linesNumOut, sourceOutMode, shutdownType, testType;
 	volatile char upsId[IDENT_LEN_MAX], man[IDENT_LEN_MAX], model[IDENT_LEN_MAX], verSoftware[IDENT_LEN_MAX];
@@ -192,9 +193,17 @@ struct upsDataStrucT {
 	#if defined COMM_MONITOR_PORT				// communication monitoring enabled
 		volatile char StrCommMonitor [TEMP_BUFFER_LENGTH];		// communication debuging
 	#endif
+    #if (defined NOV_CAT_J)
+        // ORed summary relay status from Micro board
+        int bossSummaryRelayStatus;
+    #endif
 };
 
 extern volatile struct upsDataStrucT upsOne, upsTwo, upsThree, upsBoss, *pUpsOne, *pUpsTwo, *pUpsThree, *pUpsBoss, *pUps;
+
+// The folllowing array has been moved to main -- IAR would not link due to duplicate instantiations w/ lcd.display.c if the the .h file was loaded
+//                                                                                                             ...it included main.h which led to trouble
+//char StrParams[PARAM_NUM_MAX][PARAM_LEN_MAX];	
 
 // Function Prototypes
 /*
@@ -244,7 +253,7 @@ void updateDisplay(void);
 operatingModesT selectStrOpMode(volatile char *str);
 upsParsePollEnum_t scanResponseHeader(volatile char *str);
 long scanEstSecBat(volatile char *str);
-void scanParams(volatile struct upsDataStrucT *upsData);
+int scanParams(volatile struct upsDataStrucT *upsData);
 void scanSnmpParams(volatile struct snmpDataStruct *parseType);
 void tab(volatile char *str, volatile int tabTo);
 void rs485tabularData(void);
@@ -263,7 +272,7 @@ char *itoa3(volatile int i);
 #if BAT_CAP_METHOD==BAT_CAP_JOULE
 	void batCapJouleUpdate(volatile struct upsDataStrucT *upsData);
 #endif
-#if defined UCLASS_FA10002
+#if ((defined UCLASS_FA10002) && (!defined NAVFAC_FA10241))
 	void uclass_com(void);						// some added communication between boards
 #endif
 void main(void);

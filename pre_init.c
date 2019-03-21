@@ -52,7 +52,18 @@
 /* The linker will include the updated version if it is linked in prior to   */
 /* linking with the C/C++ runtime library (rts430.lib).                      */
 /*****************************************************************************/
-#include <msp430x54xa.h>
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+#else
+	#include <msp430x54x.h>
+#endif
+
+// Function prototypes
+
+int _system_pre_init(void);
+
+// End function prototypes
 
  int _system_pre_init(void)
 {

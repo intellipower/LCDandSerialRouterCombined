@@ -1,6 +1,8 @@
 #ifndef _HD44780_display_h_    // inclusion guard
 #define _HD44780_display_h_
 
+#include "types.h"
+
 #define 	LCD_ROWS		4
 #define		LCD_ROW_CHARS	20
 #define     LCD_ODATA_PORT	P4OUT
@@ -10,7 +12,8 @@
 #define     E				0x04		//P3.2
 #define		RW				0x02		//P3.1
 #define     RS				0x01		//P3.0
-#define		E_CYCLE_TIME	_NOP();_NOP()
+//#define		E_CYCLE_TIME	_NOP();_NOP()		//Note: this define doesn't appear used...should have a terminating ";"?
+#define     E_CYCLE_TIME  __NOP; __NOP;
 
 // Reference any custom characters
 #define BAR0_CHAR 0

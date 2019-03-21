@@ -2,6 +2,8 @@
 //
 //	System Configuration information
 //
+//	Version 1.01a
+//		Added OLD_SHUTDOWN define to try and fix problem
 //	Version 1.01
 //		Updated input transfer voltages from 220 to 440
 //	Version 1.0
@@ -30,9 +32,9 @@
 #define DUAL_BOARD_SERIES	TRUE		// if using dual boards in series
 #define DUAL_BOARD_MASTER_BYPASS_CONTROL // Dual board units can have just Master or both control bypass
 #define UPS_STATE_CONTROL TRUE			// router controls the operation of 1 or 2 UPS
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
+// *** Test this change for problem with delayed shutdown/startup combo
+#define OLD_SHUTDOWN
+// *** Test end
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0

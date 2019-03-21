@@ -1,4 +1,11 @@
-#include  <msp430x54x.h>
+
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+#else
+	#include <msp430x54x.h>
+#endif
+
 #include "types.h"
 #include "HD44780_display.h"
 //#include "timera.h"
@@ -44,6 +51,15 @@ typedef enum {
 lcd_states_t lcdState = LCD_IDLE;
 
 int busyWaitSubState = 1;
+
+// Function prototypes
+
+void e_toggle(void);
+void wait_for_lcd(void);
+void write_data(uint8_t bytedata);
+void write_cmd(uint8_t bytedata);
+int lcdCmdPending(void);
+void write_cmd_init(uint8_t bytedata);
 
 // Toggle the E control line
 void e_toggle(void){

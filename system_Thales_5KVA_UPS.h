@@ -2,6 +2,8 @@
 //
 //	System Configuration information
 //
+// Version 1.07
+//	Added compiler switch CHARGER_UPS_THREE
 // Version 1.06
 //	Changed Ambient temperature trip to 70C, it didn't shut down the inverter before.
 // Now it does.
@@ -23,17 +25,15 @@
 //#define FALSE 0
 
 #define DESCRIPTION "Thales 5KVA Router "
-#define autoStart 1						// 0=no auto start, 1=yes
+#define autoStart 1                     // 0=no auto start, 1=yes
 #define UPS_MODEL "5000"
 #define LCD_DISPLAY FALSE
-#define DUAL_BOARD TRUE				// if using 2 Model F with separate battery strings
-#define DUAL_BOARD_SERIES	TRUE		// if using dual boards in series
-#define UPS_STATE_CONTROL TRUE			// router controls the operation of 1 or 2 UPS
+#define DUAL_BOARD TRUE                 // if using 2 Model F with separate battery strings
+#define DUAL_BOARD_SERIES   TRUE        // if using dual boards in series
+#define UPS_STATE_CONTROL   TRUE        // router controls the operation of 1 or 2 UPS
+#define CHARGER_UPS_THREE               // when Monster has Monster charger using upsThree data structure
 //#define BYPASS_RECOVER					// Will try to recover from overload bypass
 //#define OVERLOAD_BYPASS				// Overload will force unit on bypass, not defining will shutdown
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0
@@ -100,7 +100,7 @@ typedef enum {
 // 10 levels, if greater than 10 then no reporting internal or RS485 will be done
 #define EVENT_REPORT_LEVEL 100
 //#define EVENT_REPORT_LEVEL 5
-#define RS485LOCKOUT_DEBUG		// Allow debug to get around lockout
+//#define RS485LOCKOUT_DEBUG		// Allow debug to get around lockout
 
 // DEBUG_PORT TRUE or FALSE used to switch P11.1 and P11.2
 // from outputting MCLK and SMCLK to debug use debug utilize

@@ -1,5 +1,11 @@
 
-#include  <msp430x54x.h>
+#include "IAR_YES_NO.h"
+#ifdef __IAR
+	#include "io430.h"
+#else
+	#include <msp430x54x.h>
+#endif
+
 //#include "types.h"
 #include "timera.h"
 #include "uscia_UART.h"
@@ -8,6 +14,13 @@
 #include "uscia2_UART.h"
 #include "uscia3_UART.h"
 */
+
+// Function Prototypes
+
+__interrupt void Timer_A (void);    // Timer A interrupt routine
+
+// End of Function Prototypes
+
 /*
 extern struct timeT {
 	int days;

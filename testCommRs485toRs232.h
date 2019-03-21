@@ -44,9 +44,6 @@
 //#define BYPASS_RECOVER				// Will try to recover from overload bypass
 //#define OVERLOAD_BYPASS				// Overload will force unit on bypass, not defining will shutdown
 
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
-
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0
 #define UPS_VOLTINNOM 240.0

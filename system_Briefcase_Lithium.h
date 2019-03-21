@@ -23,7 +23,7 @@
 
 //#define TRUE 1
 //#define FALSE 0
-#define NOV_UPS==FALSE
+//#define NOV_UPS FALSE
 
 #define DESCRIPTION "Briefcase Lithium "
 #define autoStart 0
@@ -34,9 +34,6 @@
 #define UPS_STATE_CONTROL TRUE		// router controls the operation of 1 or 2 UPS
 #define LCD_BYPASS_OPTION_DISABLED		// Do not display Bypass option on LCD
 #define LCD_MANAGER_BOSS
-
-// X2_CLOCK_MHZ _7_3728MHZ or 16
-#define X2_CLOCK_MHZ 16
 
 #define UPS_MANUFACTURER "INTELLIPOWER"
 #define UPS_FREQINNOM 60.0
