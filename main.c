@@ -39,15 +39,6 @@ char StrParams[PARAM_NUM_MAX][PARAM_LEN_MAX];   // moved out of main.h to avoid 
 #include "system_config.h"						// includes file name for configuration
 #include SYSTEM_CONFIG							// configuration header file
 
-// Function Prototypes
-
-void refreshAlarmString (void);
-void init_charger_com (volatile struct snmpDataStruct *parseType);
-void charger_com (volatile struct upsDataStrucT *upsData, volatile struct snmpDataStruct *parseType);
-
-// End of function prototypes
-
-
 /*
 Note: the following are notifications sent from the ups, this happens
 when a button is pressed on the front panel or an important event occurs
@@ -3513,10 +3504,21 @@ void snmp_com(volatile struct upsDataStrucT *upsData, volatile struct snmpDataSt
 				} 
 				else 
 				{
+                    #if (!defined ZERO_POWER_REPORTING_WATTS)
 					temp1 = (int)((upsData->ampOut + 0.5)*10);
+                    #else   // #if (defined ZERO_POWER_REPORTING_WATTS)
+                    if (upsData->powOut >= ZERO_POWER_REPORTING_WATTS)
+                    {
+                        temp1 = (int)((upsData->ampOut + 0.5)*10);
+                    }
+                    else
+                    {
+                        temp1 = (int) 0;
+                    }
+                    #endif  // #if (!defined ZERO_POWER_REPORTING_WATTS)
 				}
 			} 
-			else 
+			else // if (parseType->parser != SNMP) UPSILON
 			{
 				//temp1 = (int) ((((upsData->powOut/UPS_POWOUTNOM) * 100) + 0.5)*10);
 				if (upsBoss.bypassMode == ON)			    // if either board on bypass
@@ -3525,29 +3527,68 @@ void snmp_com(volatile struct upsDataStrucT *upsData, volatile struct snmpDataSt
 				} 
 				else 
 				{
+                    #if (!defined ZERO_POWER_REPORTING_WATTS)
 					temp1 = (int) (upsData->loadPctOut + 0.5)*10;
+                    #else   // #if (defined ZERO_POWER_REPORTING_WATTS)
+                    if (upsData->powOut >= ZERO_POWER_REPORTING_WATTS)
+                    {
+                        temp1 = (int) (upsData->loadPctOut + 0.5)*10;
+                    }
+                    else
+                    {
+                        temp1 = (int) 0;
+                    }
+                    #endif  // #if (!defined ZERO_POWER_REPORTING_WATTS)
 				}
 			}
 			if (parseType->parser == SNMP) 
 			{
 				//temp2 = (int) (((upsData->powOut/UPS_POWOUTNOM) * 100) + 0.5);
 				#ifdef SNMP_MIMIC
-					temp2 = (int) (upsData->loadPctOut + 0.5);
-				#else		                                // if either board on bypass
-					if (upsBoss.bypassMode == ON) 
-					{
-						temp2 = 0;							// don't report load on bypass
-					} 
-					else 
-					{
-						temp2 = (int) (upsData->loadPctOut + 0.5);
-					}
-				#endif
+
+                #if (!defined ZERO_POWER_REPORTING_WATTS)
+                temp2 = (int) (upsData->loadPctOut + 0.5)*10;
+                #else   // #if (defined ZERO_POWER_REPORTING_WATTS)
+                if (upsData->powOut >= ZERO_POWER_REPORTING_WATTS)
+                {
+                    temp2 = (int) (upsData->loadPctOut + 0.5)*10;
+                }
+                else
+                {
+                    temp2 = (int) 0;
+                }
+                #endif  // #if (!defined ZERO_POWER_REPORTING_WATTS)
+
+				#else   // #ifndef SNMP_MIMIC - if either board on bypass
+                
+                if (upsBoss.bypassMode == ON) 
+                {
+                    temp2 = 0;							// don't report load on bypass
+                } 
+                else 
+                {
+
+                    #if (!defined ZERO_POWER_REPORTING_WATTS)
+                    temp2 = (int) (upsData->loadPctOut + 0.5)*10;
+                    #else   // #if (defined ZERO_POWER_REPORTING_WATTS)
+                    if (upsData->powOut >= ZERO_POWER_REPORTING_WATTS)
+                    {
+                        temp2 = (int) (upsData->loadPctOut + 0.5);
+                    }
+                    else
+                    {
+                        temp2 = (int) 0;
+                    }
+                    #endif  // #if (!defined ZERO_POWER_REPORTING_WATTS)
+
+                }
+
+				#endif  // #ifdef SNMP_MIMIC
 			} 
-			else 
+			else // if (parseType->parser != SNMP) UPSILON
 			{
-				if (upsBoss.bypassMode == ON) 
-				{			// if either board on bypass
+				if (upsBoss.bypassMode == ON) 			    // if either board on bypass
+				{
 					temp2 = 0;								// don't report load on bypass
 				} 
 				else 
@@ -3639,7 +3680,18 @@ void snmp_com(volatile struct upsDataStrucT *upsData, volatile struct snmpDataSt
 			} 
 			else 
 			{
+                #if (!defined ZERO_POWER_REPORTING_WATTS)
 				strcat((char *) responseStr,itoa((int)(upsData->powOut + 0.5)));
+                #else   // #if (defined ZERO_POWER_REPORTING_WATTS)
+                if (upsData->powOut >= ZERO_POWER_REPORTING_WATTS)
+                {
+				    strcat((char *) responseStr,itoa((int)(upsData->powOut + 0.5)));
+                }
+                else
+                {
+				    strcat((char *) responseStr,itoa(0));
+                }
+                #endif  // #if (!defined ZERO_POWER_REPORTING_WATTS)
 			}
 			strcat((char *) responseStr,",");
 			// ST3-7 Output Load 1

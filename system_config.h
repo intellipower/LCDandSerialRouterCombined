@@ -17,7 +17,7 @@
 #ifndef _system_config_h_    // inclusion guard
 #define _system_config_h_
 // make sure RS485 Debug is off!! (until debug is debugged, it interferes with RS232)
-#define VERSION "1.63i 2017-05-22"
+#define VERSION "1.63iX03 2019-11-11"
 
 #define X2_CLOCK_FREQUENCY ((long) 16000000)    // Crystal clock speed
 //#define X2_CLOCK_FREQUENCY ((long) 25000000)  // Crystal clock speed
@@ -62,7 +62,7 @@
 #define TEST_CONFIG_RS485_TO_RS232 "testCommRs485toRs232.h"
 
 
-#define SYSTEM_CONFIG CONFIG_CANES_6_6KVA_440VIN
+#define SYSTEM_CONFIG CONFIG_TRANSTECTOR_5KVA_UPS
 
 
 #endif // inclusion guard

@@ -269,6 +269,9 @@ void init_ups_state_controller(void);
 void ups_state_controller(void);	// TODO - straighten out function prototypes
 char *itoa(volatile int i);
 char *itoa3(volatile int i);
+void refreshAlarmString (void);
+void init_charger_com (volatile struct snmpDataStruct *parseType);
+void charger_com (volatile struct upsDataStrucT *upsData, volatile struct snmpDataStruct *parseType);
 #if BAT_CAP_METHOD==BAT_CAP_JOULE
 	void batCapJouleUpdate(volatile struct upsDataStrucT *upsData);
 #endif
