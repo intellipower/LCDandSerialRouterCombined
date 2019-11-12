@@ -58,6 +58,9 @@
 #define OVERLOAD_TRIP			125.0
 #define OVERLOAD_TRIP_CLEAR	120.0
 
+// Only reporting load percent to SNMP and Britecom when above setpoint for watts
+#define ZERO_POWER_REPORTING_WATTS (100.0f)
+
 #define BAT_CAP_JOULE		0				// This uses router Joule calculation based on battery V & I
 #define BAT_CAP_MODEL_F	1				// This uses percent reported by Model F boards
 #define BAT_CAP_METHOD	BAT_CAP_MODEL_F		// Select method, use numbers for future expansion

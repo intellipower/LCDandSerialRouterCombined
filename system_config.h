@@ -62,7 +62,7 @@
 #define TEST_CONFIG_RS485_TO_RS232 "testCommRs485toRs232.h"
 
 
-#define SYSTEM_CONFIG CONFIG_TRANSTECTOR_5KVA_UPS
+#define SYSTEM_CONFIG CONFIG_FAIRLEAD_5KVA
 
 
 #endif // inclusion guard

@@ -3660,19 +3660,25 @@ void snmp_com(volatile struct upsDataStrucT *upsData, volatile struct snmpDataSt
 			//		str,(int)(upsData->freqOut*10),
 			//		(int)((upsData->voltOut + 0.5)*10),
 			//		temp1,(int)(upsData->powOut + 0.5),temp2);
+
 			// ST3-1 Output Source
 			strcpy((char *) responseStr,(char *) str);			// output source, set above
 			strcat((char *) responseStr,",");
+
 			// ST3-2 Output Frequency
 			strcat((char *) responseStr,itoa((int)(upsData->freqOut*10)));
+
 			// ST3-3 Output number of lines
 			strcat((char *) responseStr,",1,");
+
 			// ST3-4 Output Voltage 1
 			strcat((char *) responseStr,itoa((int)((upsData->voltOut + 0.5)*10)));
 			strcat((char *) responseStr,",");
+
 			// ST3-5 Output Current 1
 			strcat((char *) responseStr,itoa(temp1));
 			strcat((char *) responseStr,",");
+
 			// ST3-6 Output Power 1
 			if (upsBoss.bypassMode == ON)			            // if either board on bypass
 			{
@@ -3694,6 +3700,7 @@ void snmp_com(volatile struct upsDataStrucT *upsData, volatile struct snmpDataSt
                 #endif  // #if (!defined ZERO_POWER_REPORTING_WATTS)
 			}
 			strcat((char *) responseStr,",");
+            
 			// ST3-7 Output Load 1
 			strcat((char *) responseStr,itoa(temp2));
 			strcpy((char *) str,(char *) responseStr);
