@@ -17,7 +17,7 @@
 #ifndef _system_config_h_    // inclusion guard
 #define _system_config_h_
 // make sure RS485 Debug is off!! (until debug is debugged, it interferes with RS232)
-#define VERSION "1.63j 2019-11-12"
+#define VERSION "1.63jX03 2019-11-26"
 
 #define X2_CLOCK_FREQUENCY ((long) 16000000)    // Crystal clock speed
 //#define X2_CLOCK_FREQUENCY ((long) 25000000)  // Crystal clock speed
@@ -39,7 +39,7 @@
 #define CONFIG_THALES_3KVA_UPS      "system_Thales_3KVA_UPS.h"
 #define CONFIG_THALES_5KVA_UPS      "system_Thales_5KVA_UPS.h"
 #define CONFIG_THALES_5KVA_CHGR     "system_Thales_5KVA_Dual_Charger.h"
-#define CONFIG_TRANSTECTOR_5KVA_UPS "system_TRANSTECTOR_UPS_5KVA_FA00424.h"
+#define CONFIG_TRANSTECTOR_5KVA_UPS_FA00424 "system_TRANSTECTOR_UPS_5KVA_FA00424.h"
 #define CONFIG_NOV                  "system_NOV_UPS.h"
 #define CONFIG_NOV_CAT_J_UPS        "system_NOV_CAT_J_UPS.h"
 #define CONFIG_NOV_CAT_J_CHGR       "system_NOV_CAT-J_Dual_Charger.h"
@@ -62,7 +62,7 @@
 #define TEST_CONFIG_RS485_TO_RS232 "testCommRs485toRs232.h"
 
 
-#define SYSTEM_CONFIG CONFIG_FAIRLEAD_5KVA
+#define SYSTEM_CONFIG CONFIG_TRANSTECTOR_5KVA_UPS_FA00424
 
 
 #endif // inclusion guard

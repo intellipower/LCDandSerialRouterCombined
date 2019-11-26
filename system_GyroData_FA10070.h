@@ -51,7 +51,7 @@
 #define BAT_SETPOINT_CHANGE
 #define BAT_SET_BAT_SD_LOW_PWR			(1.75)
 #define BAT_SET_BAT_WARN_LOW_PWR		(1.95)
-#define BAT_SET_BAT_SD_NORM_PWR		(1.67)
+#define BAT_SET_BAT_SD_NORM_PWR		    (1.67)
 #define BAT_SET_BAT_WARN_NORM_PWR		(1.75)
 
 #define TEMP_AMB_ALM_ON 	65.0

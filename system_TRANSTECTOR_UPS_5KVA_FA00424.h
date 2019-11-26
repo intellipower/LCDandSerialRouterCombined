@@ -24,7 +24,7 @@
 //#define TRUE 1
 //#define FALSE 0
 
-#define DESCRIPTION "TRANSTECTOR 5KVA Router "
+#define DESCRIPTION "TRANSTECTOR 5KVA Router FA00424 "
 #define autoStart 1						// 0=no auto start, 1=yes
 #define UPS_MODEL "5000"
 #define LCD_DISPLAY FALSE
@@ -48,6 +48,14 @@
 // 5KVA 230V = 8 Batteries, Engility 120V = 6 Batteries
 #define NUM_BAT 8.0
 #define NUM_CELLS NUM_BAT * 6.0
+// comment out if to use default, if in it will use values below, they are in volts/cell
+#define BAT_SETPOINT_CHANGE
+#if (defined BAT_SETPOINT_CHANGE)
+#define BAT_SET_BAT_SD_LOW_PWR			(1.00)  // lowered so Microcontroller will shut down at it's setpoint
+#define BAT_SET_BAT_WARN_LOW_PWR		(1.646) // low battery setpoint for 79VDC battery string
+#define BAT_SET_BAT_SD_NORM_PWR		    (1.00)
+#define BAT_SET_BAT_WARN_NORM_PWR		(1.646)
+#endif // #if (defined BAT_SETPOINT_CHANGE)
 
 #define TEMP_AMB_ALM_ON 	65.0
 #define TEMP_AMB_ALM_OFF 	60.0

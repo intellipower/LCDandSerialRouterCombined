@@ -1564,7 +1564,7 @@ void init_ups_com(void)	// TODO - Add virtual UPS Nominal values in initiation
 	upsOne.ampBat = upsTwo.ampBat = upsBoss.ampBat = 0;
 	upsOne.ampChg = upsTwo.ampChg = upsBoss.ampChg = 0;
 	upsOne.voltBat = upsTwo.voltBat = upsBoss.voltBat = NUM_CELLS * 2.0;
-	upsOne.vBatShutdown = upsTwo.vBatShutdown = upsBoss.vBatShutdown = NUM_CELLS * 2.0;
+	upsOne.vBatShutdown = upsTwo.vBatShutdown = upsBoss.vBatShutdown = NUM_CELLS * 1.67; // set to high power threshold
 	upsOne.vBatWarn = upsTwo.vBatWarn = upsBoss.vBatWarn = NUM_CELLS * 2.0;
 	upsOne.batChgPct = upsTwo.batChgPct = upsBoss.batChgPct = 100.0;
 	upsOne.freqIn = upsTwo.freqIn = upsBoss.freqIn = UPS_FREQINNOM;
