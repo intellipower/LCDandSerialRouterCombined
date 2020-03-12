@@ -51,6 +51,9 @@
 #define CONFIG_FA10021              "system_FA10021_UPS.h"          // UCLASS, 240Vout, 4.2KW
 #define CONFIG_FA10241				"system_FA10241_NAVFAC_6KVA_4.3KW_UPS.h" // Monster
 #define CONFIG_FAIRLEAD_5KVA        "system_FAIRLEAD_UPS_DUAL_5KVA_4KW.h"
+#define CONFIG_SEWIP_4KVA_3_5KW_FA10343     "system_SEWIP_4KVA_3_5KW_CH10343.h"
+#define CONFIG_SEWIP_5KVA_4_2KW_FA10334     "system_SEWIP_5KVA_4_2KW_CH10334.h"
+#define CONFIG_SEWIP_5_5KW_3_PHASE_440VIN_OUT  "system_SEWIP_5.5KW_UPS_3_Phase_440V_FA10336.h"
 // NOV Pressure 3KVA 2.5KW with charger Model F Board and large battery string
 // fixed bug 2014-03-21, check LCD and Serial Router NOV Working folder
 // search for compile flags NOV_UPS and AUTO_RESTART, this bug caused system to hang at startup
@@ -62,7 +65,7 @@
 #define TEST_CONFIG_RS485_TO_RS232 "testCommRs485toRs232.h"
 
 
-#define SYSTEM_CONFIG CONFIG_TRANSTECTOR_5KVA_UPS_FA00424
+#define SYSTEM_CONFIG CONFIG_SEWIP_4KVA_3_5KW_FA10343
 
 
 #endif // inclusion guard
